@@ -1,0 +1,4349 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Web udemy APIs
+  description: Web udemy APIs
+
+servers:
+  - url: /api
+tags:
+  - name: login
+    description: xác thực và uỷ quyền
+  - name: account
+    description: apis liên quan đến tài khoản người dùng
+  - name: user
+    description: apis liên quan đến thông tin người dùng
+  - name: cart
+    description: apis liên quan đến giỏ hàng
+  - name: admin user
+    description: "quản lý tài khoản người dùng"
+  - name: category
+    description: "quản lý categories"
+  - name: course
+    description: apis liên quan đến khoá học
+  - name: chapter
+    description: apis liên quan đến chương của khoá học
+  - name: lesson
+    description: apis liên quan đến bài học của khoá học
+  - name: quiz
+    description: apis liên quan đến quiz
+  - name: exam
+    description: apis liên quan đến exam
+  - name: my course
+    description: apis liên quan đến khoá học đã mua
+  - name: rate
+    description: apis liên quan đánh giá khoá học
+  - name: coupon
+    description: apis liên quan đến mã giảm giá
+  - name: payment
+    description: apis liên quan đến thanh toán
+  - name: chat
+    description: apis liên quan nhắn tin
+  - name: teacher
+    description: apis liên quan teacher
+  - name: invoice
+    description: apis liên quan hoá đơn
+  - name: statistic
+    description: apis liên quan thống kê
+  - name: admin web configs
+    description: apis liên quan đến web configs
+
+# Basic authentication
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+            - student
+            - teacher
+            - admin
+        refreshToken:
+          type: string
+        accessToken:
+          type: string
+        isActive:
+          type: boolean
+          default: true
+      required:
+        - email
+        - password
+    CreateAccountDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+            - student
+            - teacher
+            - admin
+      required:
+        - email
+        - password
+    UpdateAccountDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+          enum:
+            - student
+            - teacher
+            - admin
+        isActive:
+          type: boolean
+
+    User:
+      type: object
+      properties:
+        account:
+          $ref: "#/components/schemas/Account"
+        fullName:
+          type: string
+        birthday:
+          type: string
+        gender:
+          type: boolean
+        phone:
+          type: string
+        avatar:
+          type: string
+      required:
+        - "fullName"
+    CreateUserDto:
+      type: object
+      properties:
+        account:
+          type: string
+        fullName:
+          type: string
+        birthday:
+          type: string
+        gender:
+          type: boolean
+        phone:
+          type: string
+        avatar:
+          type: string
+      required:
+        - "fullName"
+        - "account"
+    UpdateUserDto:
+      type: object
+      properties:
+        fullName:
+          type: string
+        birthday:
+          type: string
+        gender:
+          type: boolean
+        phone:
+          type: string
+        avatar:
+          type: string
+          format: binary
+
+    Teacher:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        payments:
+          type: object
+          properties:
+            accountNumber:
+              type: string
+            cardNumber:
+              type: string
+            name:
+              type: string
+            bankName:
+              type: string
+        description:
+          type: string
+      required:
+        - "user"
+    UpdateTeacherDto:
+      type: object
+      properties:
+        payments:
+          type: object
+          properties:
+            accountNumber:
+              type: string
+            cardNumber:
+              type: string
+            name:
+              type: string
+            bankName:
+              type: string
+        description:
+          type: string
+
+    Cart:
+      type: object
+      properties:
+        user:
+          $ref: "#/components/schemas/User"
+        course:
+          $ref: "#/components/schemas/Course"
+        coupon:
+          type: string
+        wishlist:
+          type: boolean
+          default: false
+    CreateCartDto:
+      type: object
+      properties:
+        course:
+          type: string
+          description: "mã khoá học"
+      required: [course]
+    UpdateCartDto:
+      type: object
+      properties:
+        coupon:
+          type: string
+        wishlist:
+          type: boolean
+
+    Verify:
+      type: object
+      properties:
+        email:
+          type: string
+        code:
+          type: string
+        dateCreated:
+          type: number
+
+    Category:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        publish:
+          type: boolean
+          default: false
+        isPending:
+          type: boolean
+          default: false
+      required:
+        - name
+    CreateCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+      required: [name]
+    UpdateCategoryDto:
+      type: object
+      properties:
+        name:
+          type: string
+        publish:
+          type: boolean
+        isPending:
+          type: boolean
+
+    Course:
+      type: object
+      properties:
+        name:
+          type: string
+        slug:
+          type: string
+        category:
+          $ref: "#/components/schemas/Category"
+        thumbnail:
+          type: string
+        description:
+          type: string
+        lang:
+          type: string
+        intendedLearners:
+          type: array
+          items:
+            type: string
+        level:
+          type: string
+        targets:
+          type: array
+          items:
+            type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        currentPrice:
+          type: number
+        originalPrice:
+          type: number
+        saleOff:
+          type: number
+        author:
+          $ref: "#/components/schemas/User"
+        sellNumber:
+          type: string
+        hashtags:
+          type: array
+          items:
+            type: string
+        publish:
+          type: boolean
+          default: false
+        status:
+          type: string
+          enum: ["draft", "pending", "approved"]
+      required:
+        - name
+        - thumbnail
+        - author
+        - targets
+        - category
+        - description
+    CreateCourseDto:
+      type: object
+      properties:
+        name:
+          type: string
+        category:
+          type: string
+        thumbnail:
+          type: string
+        description:
+          type: string
+        lang:
+          type: string
+        intendedLearners:
+          type: string
+        level:
+          type: string
+        targets:
+          type: array
+          items:
+            type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        currentPrice:
+          type: number
+        originalPrice:
+          type: number
+        hashtags:
+          type: array
+          items:
+            type: string
+      required:
+        [name, category, description, targets, currentPrice, originalPrice]
+    UpdateCourseDto:
+      type: object
+      properties:
+        name:
+          type: string
+        thumbnail:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        lang:
+          type: string
+        intendedLearners:
+          type: array
+          items:
+            type: string
+        level:
+          type: string
+          enum: ["all", "beginer", "intermediate", "expert"]
+        targets:
+          type: array
+          items:
+            type: string
+        requirements:
+          type: array
+          items:
+            type: string
+        currentPrice:
+          type: number
+        originalPrice:
+          type: number
+        hashtags:
+          type: array
+          items:
+            type: string
+        publish:
+          type: boolean
+        status:
+          type: string
+          enum: ["draft", "pending", "approved"]
+
+    Rate:
+      type: object
+      properties:
+        course:
+          $ref: "#/components/schemas/Course"
+        author:
+          $ref: "#/components/schemas/User"
+        rate:
+          type: number
+          enum:
+            - 1
+            - 2
+            - 3
+            - 4
+            - 5
+        content:
+          type: string
+      required:
+        - course
+        - author
+        - rate
+    CreateRateDto:
+      type: object
+      properties:
+        course:
+          $ref: "#/components/schemas/Course"
+        rate:
+          type: number
+          enum: [1, 2, 3, 4, 5]
+        content:
+          type: string
+      required:
+        - course
+        - rate
+    UpdateRateDto:
+      type: object
+      properties:
+        rate:
+          type: number
+          enum: [1, 2, 3, 4, 5]
+        content:
+          type: string
+
+    Comment:
+      type: object
+      properties:
+        lesson:
+          $ref: "#/components/schemas/Lesson"
+        author:
+          $ref: "#/components/schemas/User"
+        content:
+          type: string
+        replies:
+          type: array
+          items:
+            type: object
+            properties:
+              lesson:
+                $ref: "#/components/schemas/Lesson"
+              author:
+                $ref: "#/components/schemas/User"
+              content:
+                type: string
+              createdAt:
+                type: string
+ 
+
+    Chapter:
+      type: object
+      properties:
+        course:
+          $ref: "#/components/schemas/Course"
+        number:
+          type: number
+        name:
+          type: string
+    CreateChapterDto:
+      type: object
+      properties:
+        course:
+          type: string
+          description: id khoá học
+        number:
+          type: number
+        name:
+          type: string
+      required: [course, name]
+    UpdateChapterDto:
+      type: object
+      properties:
+        number:
+          type: number
+        name:
+          type: string
+
+    Lesson:
+      type: object
+      properties:
+        chapter:
+          $ref: "#/components/schemas/Chapter"
+        number:
+          type: number
+        title:
+          type: string
+        type:
+          type: string
+          enum: ["undefined", "video", "text", "slide", "quiz"]
+        video:
+          type: array
+          items:
+            type: string
+          description: mảng url resource video
+        text:
+          type: string
+        slide:
+          type: string
+        description:
+          type: string
+        saveIn:
+          type: string
+        publish:
+          type: boolean
+          default: false
+        duration:
+          type: string
+          description: "tính bằng giây"
+        resource:
+          type: string
+          description: tài liệu kèm theo bài giảng
+    CreateLessonDto:
+      type: object
+      properties:
+        chapter:
+          type: string
+        number:
+          type: number
+          description: số thứ tự của chương
+        title:
+          type: string
+        description:
+          type: string
+      required: ["chapter", "title", "number"]
+    UpdateLessonDto:
+      type: object
+      properties:
+        number:
+          type: number
+          description: số thứ tự của chương
+        title:
+          type: string
+        description:
+          type: string
+        text:
+          type: string
+        slide:
+          type: string
+          default: "url file dành cho 'type': 'slide'"
+        type:
+          type: string
+          enum: ["undefined", "video", "text", "slide", "quiz"]
+        video:
+          type: array
+          items:
+            type: string
+            default: url video m3u8 lấy từ api upload video
+        videoInfo:
+          type: object
+          properties:
+            name:
+              type: string
+              default: lấy từ api upload video
+            size:
+              type: string
+            createdAt:
+              type: string
+            status:
+              type: string
+            type:
+              type: string
+        saveIn:
+          type: string
+          default: cloudinary
+        publish:
+          type: boolean
+          default: false
+
+    MyCourse:
+      type: object
+      properties:
+        user:
+          type: string
+        course:
+          type: string
+        progress:
+          type: array
+          items:
+            type: object
+            properties:
+              lessonId:
+                type: string
+              timeline:
+                type: string
+              complete:
+                type: boolean
+                default: false
+        percentProgress:
+          type: number
+          description: phần trăm tiến trình học
+    UpdateMyCourseDto:
+      type: object
+      properties:
+        lessonId:
+          type: string
+        timeline:
+          type: string
+        complete:
+          type: boolean
+          default: false
+
+    Coupon:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum:
+            - percent
+            - money
+        apply:
+          type: string
+          enum:
+            - all
+            - author
+            - category
+            - new user
+        amount:
+          type: number
+        startDate:
+          type: string
+        expireDate:
+          type: string
+        author:
+          $ref: "#/components/schemas/User"
+        maxDiscount:
+          type: number
+        minPrice:
+          type: number
+          default: 0
+        number:
+          type: number
+          default: 100
+        codes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Code"
+      required:
+        - title
+        - type
+        - apply
+        - amount
+    CreateCouponDto:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum:
+            - percent
+            - money
+        apply:
+          type: string
+          enum:
+            - author
+            - all
+            - category
+            - new user
+        amount:
+          type: number
+        startDate:
+          type: string
+          format: date
+        expireDate:
+          type: string
+          format: date
+        maxDiscount:
+          type: number
+          description: "mặc định là vô cực"
+        minPrice:
+          type: number
+          default: 0
+        number:
+          type: number
+          default: 100
+      required:
+        - title
+        - type
+        - apply
+        - amount
+    UpdateCouponDto:
+      type: object
+      properties:
+        title:
+          type: string
+        type:
+          type: string
+          enum:
+            - percent
+            - money
+        amount:
+          type: number
+        startDate:
+          type: string
+        expireDate:
+          type: string
+        maxDiscount:
+          type: number
+          default: Infinity
+        minPrice:
+          type: number
+          default: 0
+    Code:
+      type: object
+      properties:
+        coupon:
+          type: string
+        code:
+          type: string
+        isActive:
+          type: boolean
+
+    Invoice:
+      type: object
+      properties:
+        _id:
+          type: string
+        transactionId:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+        totalPrice:
+          type: number
+        totalDiscount:
+          type: number
+        paymentPrice:
+          type: number
+        status:
+          type: string
+      required:
+        - _id
+        - transactionId
+        - user
+        - totalPrice
+        - paymentPrice
+    UpdateInvoiceDto:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: ["Unpaid", "Paid", "Refund", "Cancel"]
+
+    DetailInvoice:
+      type: object
+      properties:
+        invoice:
+          $ref: "#/components/schemas/Invoice"
+        courseId:
+          type: string
+        courseSlug:
+          type: string
+        courseName:
+          type: string
+        courseCurrentPrice:
+          type: number
+        courseAuthor:
+          type: string
+        couponCode:
+          type: string
+        amount:
+          type: number
+        discount:
+          type: number
+        status:
+          type: string
+      required:
+        - _id
+        - transactionId
+        - user
+        - totalPrice
+
+    Conversation:
+      type: object
+      properties:
+        members:
+          type: array
+          items:
+            $ref: "#/components/schemas/User"
+        pending:
+          type: string
+        recentAt:
+          type: string
+          description: dùng để biết hội thoại gần đây
+    CreateConversationDot:
+      type: object
+      properties:
+        userId:
+          type: string
+          description: id của người cần kết nối hội thoại
+        text:
+          type: string
+      required:
+        - text
+        - userId
+    Message:
+      type: object
+      properties:
+        conversation:
+          $ref: "#/components/schemas/Conversation"
+        sender:
+          $ref: "#/components/schemas/User"
+        receiver:
+          $ref: "#/components/schemas/User"
+        text:
+          type: string
+        seen:
+          type: boolean
+          default: false
+        seenAt:
+          type: string
+      required:
+        - conversation
+        - sender
+        - text
+    CreateMessageDot:
+      type: object
+      properties:
+        conversation:
+          type: string
+        text:
+          type: string
+      required:
+        - conversation
+        - text
+    Quiz:
+      type: object
+      properties:
+        question:
+          type: string
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              key:
+                type: string
+              value:
+                type: string
+              isCorrect:
+                type: boolean
+    CreateBulkQuizDto:
+      type: object
+      properties:
+        lesson:
+          type: string
+        quizs:
+          type: array
+          items:
+            $ref: "#/components/schemas/Quiz"
+      required:
+        - lesson
+        - quizs
+    UpdateQuizDto:
+      type: object
+      $ref: "#/components/schemas/Quiz"
+
+
+  parameters:
+    page:
+      name: page
+      in: "query"
+      description: phân trang
+      required: false
+      schema:
+        type: string
+        default: "1"
+    limit:
+      name: limit
+      in: "query"
+      description: "giới hạn số lượng bản ghi"
+      schema:
+        type: string
+        default: "10"
+
+security:
+  - bearerAuth: []
+
+paths:
+  /login:
+    post:
+      tags:
+        - login
+      summary: đăng nhập
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                keepLogin:
+                  type: boolean
+              required:
+                - email
+                - password
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  token:
+                    type: object
+                    properties:
+                      expiresIn:
+                        type: string
+                      accessToken:
+                        type: string
+                  role:
+                    type: string
+                  user:
+                    $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /login/google:
+    post:
+      tags:
+        - login
+      summary: Đăng nhập bằng tài khoản google
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+              required:
+                - access_token
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  token:
+                    type: object
+                    properties:
+                      expiresIn:
+                        type: string
+                      accessToken:
+                        type: string
+                  role:
+                    type: string
+                  user:
+                    $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /login/logout:
+    post:
+      tags:
+        - login
+      summary: đăng xuất
+      description: ""
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /login/refresh-token:
+    post:
+      tags:
+        - login
+      summary: lấy token mới
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refresh_token:
+                  type: string
+              required:
+                - refresh_token
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  refreshToken:
+                    type: string
+                  token:
+                    type: object
+                    properties:
+                      expiresIn:
+                        type: string
+                      accessToken:
+                        type: string
+                  role:
+                    type: string
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /accounts/verify:
+    post:
+      tags:
+        - account
+      summary: Gửi mã xác nhận tới email
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+
+      responses:
+        200:
+          description: "ok"
+        500:
+          description: "SERVER ERROR"
+  /accounts/signup:
+    post:
+      tags:
+        - account
+      summary: Đăng ký tài khoản
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                verifyCode:
+                  type: string
+                fullName:
+                  type: string
+                birthday:
+                  type: string
+                gender:
+                  type: string
+                phone:
+                  type: string
+              required:
+                - email
+                - password
+                - verifyCode
+                - fullName
+      responses:
+        200:
+          description: "ok"
+        500:
+          description: "SERVER ERROR"
+  /accounts/verify/forgot:
+    post:
+      tags:
+        - account
+      summary: Gửi mã xác thực để lấy lại mật khẩu
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+              required:
+                - email
+
+      responses:
+        200:
+          description: "ok"
+        500:
+          description: "SERVER ERROR"
+  /accounts/forgot-pw:
+    post:
+      tags:
+        - account
+      summary: Lấy lại mật khẩu
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                verifyCode:
+                  type: string
+              required:
+                - email
+                - password
+                - verifyCode
+
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Mã xác nhận không hợp lệ."
+        500:
+          description: "SERVER ERROR"
+  /accounts/change-pw:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - account
+      summary: Đổi mật khẩu
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+                oldPassword:
+                  type: string
+              required:
+                - password
+                - oldPassword
+
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: ""
+        403:
+          description: "mật khẩu không đúng"
+        500:
+          description: "SERVER ERROR"
+
+  /teacher/courses:
+    get:
+      tags:
+        - teacher
+      summary: lấy thông tin khoá học đã tạo
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            default: "all"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            default: createdAt-desc
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  courses:
+                    $ref: "#/components/schemas/Course"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /teacher/courses/{id}:
+    get:
+      tags:
+        - teacher
+      summary: lấy thông tin khoá học, danh sách chương và bài học mỗi chương
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  courses:
+                    $ref: "#/components/schemas/Course"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /teacher/info/{id}:
+    get:
+      tags:
+        - teacher
+      summary: lấy thông tin của giảng viên
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Teacher"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - teacher
+      summary: cập nhật thông tin của giảng viên
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/UpdateTeacherDto"
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Teacher"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /teacher/my-revenue:
+    get:
+      tags:
+        - teacher
+      summary: lấy thông tin doanh thu của giáo viên từ ngày a đến b
+      description: ""
+      parameters:
+        - name: start
+          in: query
+          description: "2022-05-01"
+          required: true
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: "2022-06-01"
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  courses:
+                    $ref: "#/components/schemas/Course"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /teacher/lesson/{id}/exam:
+    get:
+      tags:
+        - teacher
+      summary: Lấy danh sách bài thi từ lesson id
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: tìm bài thi từ from
+          schema:
+            type: string
+        - name: to
+          description: tìm bài thi từ from
+          in: query
+          schema:
+            type: string
+        - name: statistic
+          description: xuất data biểu đồ
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        _id: 
+                          type: string
+                        user.fullName: 
+                          type: string
+                        scores:
+                          type: number
+                        maxScores:
+                          type: number
+                        createdAt:
+                          type: string
+                  statistic:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        0:
+                          type: number
+                        
+                      
+
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    
+  /invoices:
+    get:
+      tags:
+        - invoice
+      summary: Lấy danh sách hoá đơn và phân trang
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: transaction
+          in: query
+          schema:
+            type: string
+        - name: user
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  invoices:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Invoice"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /invoices/{id}:
+    get:
+      tags:
+        - invoice
+      summary: Lấy chi tiết hoá đơn
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/DetailInvoice"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - invoice
+      summary: Cập nhật hoá đơn
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateInvoiceDto"
+      responses:
+        200:
+          description: "update ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /user:
+    get:
+      tags:
+        - user
+      summary: lấy thông tin user hiện tại
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - user
+      summary: cập nhật thông tin user hiện tại
+      description: ""
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                fullName:
+                  type: string
+                birthday:
+                  type: string
+                gender:
+                  type: boolean
+                phone:
+                  type: string
+                avatar:
+                  type: string
+                  format: binary
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateUserDto"
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    post:
+      tags:
+        - user
+      summary: đăng ký trở thành instructor
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Teacher"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /user/invoices:
+    get:
+      tags:
+        - user
+      summary: lấy lịch sử thanh toán
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - "Paid"
+              - "Refund"
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  invoices:
+                    $ref: "#/components/schemas/DetailInvoice"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /user/invoices/{id}:
+    get:
+      tags:
+        - user
+      summary: lấy chi tiết lịch sử thanh toán
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invoices:
+                    $ref: "#/components/schemas/Invoice"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /user/history:
+    get:
+      tags:
+        - user
+      summary: lấy lịch sử tìm kiếm và xem user hiện tại
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  historySearchs:
+                    type: array
+                    items:
+                      type: string
+                  historyViews:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Course"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /carts:
+    get:
+      tags:
+        - cart
+      summary: lấy thông tin giỏ hàng
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  totalPrice:
+                    type: number
+                  totalDiscount:
+                    type: number
+                  estimatedPrice:
+                    type: number
+                  carts:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Cart"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    post:
+      tags:
+        - cart
+      summary: thêm khoá học vào giỏ hàng
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateCartDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /carts/{course}:
+    put:
+      tags:
+        - cart
+      summary: cập nhật/thêm mã giảm giá vào khoá học
+      description: ""
+      parameters:
+        - name: course
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: muốn gỡ mã giảm giá thì gửi coupon=''
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCartDto"
+      responses:
+        200:
+          description: "update ok"
+        400:
+          description: "..."
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - cart
+      summary: xoá khoá học khỏi giỏ hàng
+      description: ""
+      parameters:
+        - name: course
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "remove ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /categories:
+    get:
+      tags:
+        - category
+      summary: Lấy danh sách category và phân trang
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: publish
+          in: query
+          schema:
+            type: boolean
+            default: true
+        - name: isPending
+          in: query
+          schema:
+            type: boolean
+            default: false
+        - name: used
+          in: query
+          schema:
+            type: boolean
+            default: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  categories:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Category"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    post:
+      tags:
+        - category
+      summary: Tạo mới category
+      description: ""
+      requestBody:
+        description: "Thông tin category"
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                publish:
+                  type: string
+              required:
+                - name
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Category"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - category
+      summary: xoá nhiều category
+      description: ""
+      requestBody:
+        description: "mảng category"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slugs:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /categories/{slug}:
+    get:
+      tags:
+        - category
+      summary: Lấy chi tiết category
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    $ref: "#/components/schemas/Category"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - category
+      summary: Cập nhật category
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryDto"
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCategoryDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - category
+      summary: Xoá category
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /courses/upload/image:
+    post:
+      tags:
+        - course
+      summary: Upload file
+      description: ""
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+              required:
+                - image
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /courses:
+    post:
+      tags:
+        - course
+      summary: Thêm khoá học mới
+      description: ""
+      requestBody:
+        description: "Thông tin khoá học"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                thumbnail:
+                  type: string
+                category:
+                  type: string
+                description:
+                  type: string
+                lang:
+                  type: string
+                  default: "en"
+                intendedLearners:
+                  type: array
+                  items:
+                    type: string
+                requirements:
+                  type: array
+                  items:
+                    type: string
+                targets:
+                  type: array
+                  items:
+                    type: string
+                level:
+                  type: string
+                  default: "all"
+                currentPrice:
+                  type: number
+                  default: 0
+                originalPrice:
+                  type: number
+                  default: 0
+                hashtags:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - name
+                - category
+                - description
+                - targets
+
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - course
+      summary: Lấy danh sách khoá học và phân trang
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: sort
+          in: query
+          schema:
+            type: string
+            example: rating-asc
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: category
+          in: query
+          schema:
+            type: string
+            example: web-development
+        - name: hashtags
+          in: query
+          description: "ex: nodejs-mongodb"
+          schema:
+            type: string
+        - name: min
+          in: query
+          schema:
+            type: string
+        - name: max
+          in: query
+          schema:
+            type: string
+        - name: author
+          in: query
+          schema:
+            type: string
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: ["draft", "pending", "approved"]
+        - name: publish
+          in: query
+          schema:
+            type: boolean
+            example: true
+
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  searchKey:
+                    type: object
+                    properties:
+                      suggestion:
+                        type: string
+                      original:
+                        type: string
+                  total:
+                    type: number
+                  courses:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Course"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /courses/{slug}:
+    get:
+      tags:
+        - course
+      summary: Lấy chi tiết khoá học theo slug
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - course
+      summary: Cập nhật khoá học
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCourseDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - course
+      summary: xoá khoá học bằng id
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /courses/check/{slug}:
+    get:
+      tags:
+        - course
+      summary: Lấy chi tiết khoá học (bảo gồm cả nội dung khoá học) để admin xem và duyệt
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Course"
+        500:
+          description: "SERVER ERROR"
+  /courses/{slug}/related:
+    get:
+      tags:
+        - course
+      summary: Lấy danh sách khoá học liên quan theo tags
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        500:
+          description: "SERVER ERROR"
+  /courses/hot:
+    get:
+      tags:
+        - course
+      summary: Lấy danh sách khoá học hot (số lượng bán) (theo category or all)
+      description: ""
+      parameters:
+        - name: category
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        500:
+          description: "SERVER ERROR"
+  /courses/suggest:
+    get:
+      tags:
+        - course
+      summary: Lấy danh sách khoá học đề xuất dựa vào lịch sử tìm kiếm của người dùng
+      description: ""
+      parameters:
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Course"
+        500:
+          description: "SERVER ERROR"
+  /courses/{slug}/rate:
+    get:
+      tags:
+        - course
+      summary: Lấy danh sách đánh giá của khoá học
+      description: ""
+      parameters:
+        - name: slug
+          in: path
+          required: true
+          schema:
+            type: string
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Rate"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /chapters:
+    post:
+      tags:
+        - chapter
+      summary: Thêm chapter
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateChapterDto"
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - chapter
+      summary: Lấy danh sách chapter
+      description: ""
+      parameters:
+        - name: course
+          in: query
+          schema:
+            type: string
+        - name: lesson
+          in: query
+          schema:
+            type: boolean
+          description: "lấy thông tin danh sách bài học kèm theo mỗi chương"
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chapters:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Chapter"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chapters/{id}:
+    put:
+      tags:
+        - chapter
+      summary: Cập nhật chapter
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateChapterDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - chapter
+      summary: Xoá chapter
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /lessons:
+    post:
+      tags:
+        - lesson
+      summary: Thêm lesson
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLessonDto"
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - lesson
+      summary: Lấy danh sách lesson bằng chapter id
+      description: ""
+      parameters:
+        - name: chapter
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  chapters:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Lesson"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /lessons/{id}:
+    get:
+      tags:
+        - lesson
+      summary: Thông tin lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - lesson
+      summary: Cập nhật lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateLessonDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - lesson
+      summary: Xoá lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /lessons/upload-file:
+    post:
+      tags:
+        - lesson
+      summary: Upload file
+      description: ""
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: base64
+              required:
+                - file
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: 
+                    type: string
+                  url:
+                    type: string
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /lessons/upload-video:
+    post:
+      tags:
+        - lesson
+      summary: Upload video
+      description: ""
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: base64
+                lesson_id:
+                  type: string
+              required:
+                - file
+                - lesson_id
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  video:
+                    type: array
+                    items:
+                      type: string
+                      default: url video m3u8 lấy từ api upload video
+                  videoInfo:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        default: lấy từ api upload video
+                      size:
+                        type: string
+                      createdAt:
+                        type: string
+                      status:
+                        type: string
+                      type:
+                        type: string
+        
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  
+  /my-courses:
+    get:
+      tags:
+        - my course
+      summary: lấy danh sách khoá học đã mua
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+          description: "ex: ?sort=progress-desc || ?sort=createdAt-asc"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /my-courses/{id}:
+    get:
+      tags:
+        - my course
+      summary: lấy chi tiết khoá học đã mua (để học)
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - my course
+      summary: cập nhật tiến độ học (cập nhật thông tin timeline của các video bài giảng)
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          description: id mycourse
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateMyCourseDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /rate:
+    post:
+      tags:
+        - rate
+      summary: Đánh giá khoá học
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                slug:
+                  type: string
+                rate:
+                  type: number
+                content:
+                  type: string
+              required:
+                - slug
+                - rate
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        403:
+          description: "Không được phép đánh giá! Chưa mua khoá học này."
+        500:
+          description: "SERVER ERROR"
+  /rate/{id}:
+    put:
+      tags:
+        - rate
+      summary: Cập nhật đánh giá khoá học
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateRateDto"
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        403:
+          description: "Không được phép đánh giá! Chưa mua khoá học này."
+        500:
+          description: "SERVER ERROR"
+
+  /payment/checkout:
+    post:
+      tags:
+        - payment
+      summary: Ước tính giá và thanh toán mua khoá học
+      description: "thông tin thẻ test thanh toán: <a href='https://sandbox.vnpayment.vn/apis/vnpay-demo/'>Xem ở đây</a>"
+      requestBody:
+        description: ""
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentMethod:
+                  type: string
+                  default: vnPay
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  url:
+                    type: string
+        500:
+          description: "SERVER ERROR"
+  /{gateway}/callback:
+    get:
+      tags:
+        - payment
+      summary: Trả về thông tin sau khi thanh toán
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  isSuccess:
+                    type: boolean
+                  message:
+                    type: boolean
+                  invoice:
+                    $ref: "#/components/schemas/Invoice"
+
+        500:
+          description: "SERVER ERROR"
+
+  /coupons/login-with-google:
+    get:
+      tags:
+        - coupon
+      summary: Login with google
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tokens:
+                    type: string
+        500:
+          description: "SERVER ERROR"
+  /coupons/export-sheet:
+    post:
+      tags:
+        - coupon
+      summary: Lấy dữ liệu mã giảm giá, tạo và ghi vào google sheet
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                access_token:
+                  type: string
+                refresh_token:
+                  type: string
+                expiry_date:
+                  type: string
+                id:
+                  type: string
+              required: ["access_token", "refresh_token", "expiry_date", "id"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  link:
+                    type: string
+        500:
+          description: "SERVER ERROR"
+  /coupons:
+    get:
+      tags:
+        - coupon
+      summary: Lấy danh sách coupon và phân trang
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: active
+          in: query
+          schema:
+            type: boolean
+        - name: title
+          in: query
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  coupons:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Coupon"
+        500:
+          description: "SERVER ERROR"
+    post:
+      tags:
+        - coupon
+      summary: Tạo mới coupon
+      description: ""
+      requestBody:
+        description: "Thông tin coupon"
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/CreateCouponDto"
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - coupon
+      summary: Xoá nhiều coupon
+      description: ""
+      requestBody:
+        description: "mảng mã coupon"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+              required: ["ids"]
+
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /coupons/{id}:
+    put:
+      tags:
+        - coupon
+      summary: Cập nhật coupon
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        description: "Thông tin coupon"
+        content:
+          application/json:
+            schema:
+              type: object
+              $ref: "#/components/schemas/UpdateCouponDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - coupon
+      summary: Xoá coupon
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - coupon
+      summary: Lấy chi tiết coupon
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                $ref: "#/components/schemas/Coupon"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /chat/conversation:
+    post:
+      tags:
+        - chat
+      summary: Gửi yêu cầu/chấp nhận kết nối hội thoại bằng userId
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationDot"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - chat
+      summary: Lấy danh sách hội thoại
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: pending
+          schema:
+            type: boolean
+            default: false
+          in: query
+          description: lấy hội thoại đang chờ kết nối
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      type: string
+                  pending:
+                    type: string
+                  messages:
+                    $ref: "#/components/schemas/Message"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/accept-conversation:
+    post:
+      tags:
+        - chat
+      summary: Chấp nhận kết nối hội thoại bằng conversation id
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                conversation:
+                  type: string
+                text:
+                  type: string
+              required:
+                - conversation
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/message:
+    post:
+      tags:
+        - chat
+      summary: Gửi tin nhắn bằng conversation id
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                conversation:
+                  type: string
+                text:
+                  type: string
+              required:
+                - conversation
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/conversation/{conversation}:
+    get:
+      tags:
+        - chat
+      summary: Lấy tin nhắn gần nhất của hội thoại
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: conversation
+          schema:
+            type: string
+          in: path
+          description: mã hội thoại
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - chat
+      summary: Đánh dấu đã xem tin nhắn của hội thoại
+      description: ""
+      parameters:
+        - name: conversation
+          schema:
+            type: string
+          in: path
+          description: mã hội thoại
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/chatbot:
+    post:
+      tags:
+        - chat
+      summary: Chat with Chat GPT OpenAI
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                text:
+                  type: string
+              required:
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  
+  # admin region
+  /admin/users/teachers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: lấy danh sách tài khoản người dùng
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: email
+          in: query
+          description: ""
+          schema:
+            type: string
+        - name: active
+          in: query
+          description: ""
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          description: "example: ?sort=email-asc"
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  teachers:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /admin/users/teachers/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: lấy danh sách tài khoản người dùng
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /admin/users:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: lấy danh sách tài khoản người dùng
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: email
+          in: query
+          description: ""
+          schema:
+            type: string
+        - name: role
+          in: query
+          description: ""
+          schema:
+            type: string
+        - name: active
+          in: query
+          description: ""
+          schema:
+            type: boolean
+        - name: exports
+          in: query
+          description: ""
+          schema:
+            type: boolean
+        - name: sort
+          in: query
+          description: "example: ?sort=email-asc"
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+                  users:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/User"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: tạo tài khoản người dùng mới
+      description: ""
+      requestBody:
+        description: "form data"
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+                  enum: ["student", "teacher", "admin"]
+                fullName:
+                  type: string
+                birthday:
+                  type: string
+                gender:
+                  type: boolean
+                phone:
+                  type: string
+              required:
+                - email
+                - password
+                - fullName
+
+      responses:
+        201:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /admin/users/multiple:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: tạo nhiều tài khoản người dùng bằng
+      description: xem <a href="/samples/create-multiple-account.xlsx">file excel</a> mẫu
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: base64
+              required:
+                - file
+      responses:
+        201:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  urlLogs:
+                    type: string
+                    default: /logs/1654350601129.txt
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: xoá nhiều tài khoản người dùng
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: id user
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /admin/users/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: lấy chi tiết tài khoản người dùng
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        500:
+          description: "SERVER ERROR"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: cập nhật khoản người dùng
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: id user
+          schema:
+            type: string
+      requestBody:
+        description: "form data"
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                account:
+                  type: object
+                  properties:
+                    password:
+                      type: string
+                    isActive:
+                      type: boolean
+                user:
+                  type: object
+                  properties:
+                    fullName:
+                      type: string
+                    birthday:
+                      type: string
+                    gender:
+                      type: boolean
+                    phone:
+                      type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: xoá tài khoản người dùng
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: id user
+          schema:
+            type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /admin/users/students-of-teacher/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin user
+      summary: lấy danh sách tài khoản người dùng đã đăng ký học của teacher id
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          description: ""
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: string
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+
+  /statistics/revenues/daily:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Doanh thu từ ngày a đến b theo ngày/ tháng
+      description: ""
+      parameters:
+        - name: start
+          in: query
+          schema:
+            type: string
+          description: "dấu thời gian"
+          required: true
+        - name: end
+          in: query
+          schema:
+            type: string
+          description: "dấu thời gian"
+          required: true
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum: ["day", "month"]
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/revenues/monthly/{year}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Doanh thu theo tháng trong năm 'year'
+      description: ""
+      parameters:
+        - name: year
+          in: path
+          schema:
+            type: string
+            default: "2022"
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+        - name: number
+          in: query
+          schema:
+            type: number
+          description: số năm trước năm year
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/revenues/yearly:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Doanh thu theo năm trong năm từ năm start đến end
+      description: ""
+      parameters:
+        - name: start
+          in: query
+          description: năm bắt đầu
+          schema:
+            type: string
+            default: "2015"
+          required: true
+        - name: end
+          in: query
+          description: năm kết thúc
+          schema:
+            type: string
+            default: "2022"
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: number
+
+        500:
+          description: "SERVER ERROR"
+  /statistics/users/yearly:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Số lượng người dùng mới trong năm start - end
+      description: ""
+      parameters:
+        - name: start
+          in: query
+          description: năm bắt đầu
+          schema:
+            type: string
+            default: "2021"
+          required: true
+        - name: end
+          in: query
+          description: năm kết thúc
+          schema:
+            type: string
+            default: "2022"
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  raise:
+                    type: number
+                  newUsers:
+                    type: number
+                  activating:
+                    type: number
+                  notActivating:
+                    type: number
+
+        500:
+          description: "SERVER ERROR"
+  /statistics/users/monthly:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Số lượng người dùng mới theo tháng trong năm year
+      description: ""
+      parameters:
+        - name: year
+          in: query
+          description: năm bắt đầu
+          schema:
+            type: string
+            default: "2022"
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  thisYear:
+                    type: number
+                  lastYear:
+                    type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/courses:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: số lượng khoá học đang xuất bản và đang chờ duyệt
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  publishCourse:
+                    type: number
+                  pendingCourse:
+                    type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/top-sale-courses/year:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: top số lượng bán khoá học trong 1 năm
+      description: ""
+      parameters:
+        - name: top
+          in: query
+          schema:
+            type: number
+            default: "5"
+        - name: year
+          in: query
+          schema:
+            type: number
+            default: "2022"
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: string
+        500:
+          description: "SERVER ERROR"
+  /statistics/top-sale-courses/month:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: top số lượng bán khoá học trong 1 tháng
+      description: ""
+      parameters:
+        - name: top
+          in: query
+          schema:
+            type: number
+            default: "5"
+        - name: year
+          in: query
+          schema:
+            type: number
+            default: 2022
+          required: true
+        - name: month
+          in: query
+          schema:
+            type: number
+            default: 6
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: string
+            enum: ["false", "true"]
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: string
+        500:
+          description: "SERVER ERROR"
+  /statistics/coupons:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Số lượng mã giảm giá
+      description: ""
+      parameters:
+        - name: active
+          in: query
+          description: đang có hiệu lực
+          schema:
+            type: boolean
+        - name: countdown
+          in: query
+          description: chưa bắt đầu có hiệu lực
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/revenues/teachers:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: thống kê doanh thu của các giảng viên theo tháng
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: "email"
+          in: query
+          schema:
+            type: string
+        - name: "month"
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: year
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: sort
+          in: query
+          schema:
+            type: string
+        - name: exports
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                        birthday:
+                          type: string
+                        gender:
+                          type: boolean
+                        phone:
+                          type: string
+                        avatar:
+                          type: string
+                        revenue:
+                          type: string
+                        numOfDetailInvoice:
+                          type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/revenues/teachers/{id}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: Doanh thu chi tiết của giáo viên trong month-year
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+        - name: "month"
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: year
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: exports
+          in: query
+          schema:
+            type: boolean
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                        birthday:
+                          type: string
+                        gender:
+                          type: boolean
+                        phone:
+                          type: string
+                        avatar:
+                          type: string
+                        revenue:
+                          type: string
+                        numOfDetailInvoice:
+                          type: number
+                        detailInvoices:
+                          type: object
+                          $ref: "#/components/schemas/DetailInvoice"
+
+        500:
+          description: "SERVER ERROR"
+  /statistics/top-teachers-of-year:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: top giáo viên có số lượng bán/doanh thu cao nhất trong năm
+      description: ""
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: top
+          in: query
+          schema:
+            type: number
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                        birthday:
+                          type: string
+                        gender:
+                          type: boolean
+                        phone:
+                          type: string
+                        avatar:
+                          type: string
+                        revenue:
+                          type: string
+                        numOfDetailInvoice:
+                          type: number
+        500:
+          description: "SERVER ERROR"
+  /statistics/top-teachers-of-months:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - statistic
+      summary: top giáo viên có số lượng bán/doanh thu cao nhất các tháng trong năm
+      description: ""
+      parameters:
+        - name: year
+          in: query
+          schema:
+            type: string
+          required: true
+        - name: top
+          in: query
+          schema:
+            type: number
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        fullName:
+                          type: string
+                        birthday:
+                          type: string
+                        gender:
+                          type: boolean
+                        phone:
+                          type: string
+                        avatar:
+                          type: string
+                        revenue:
+                          type: string
+                        numOfDetailInvoice:
+                          type: number
+        500:
+          description: "SERVER ERROR"
+  
+  /admin/web-configs:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin web configs
+      summary: thông tin cấu hình web
+      description: ""
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      numOfTopCourses:
+                        type: number
+                      numOfSalesOfBestSellerCourses:
+                        type: number
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - admin web configs
+      summary: thông tin cấu hình web
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                numOfTopCourses:
+                  type: number
+                numOfSalesOfBestSellerCourses:
+                  type: number
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      numOfTopCourses:
+                        type: number
+                      numOfSalesOfBestSellerCourses:
+                        type: number
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+  
+  /quiz/create-bulk:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - quiz
+      summary: create bulk quiz of lesson
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateBulkQuizDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /quiz/{id}:
+    put:
+      tags:
+        - quiz
+      summary: Cập nhật quiz
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateQuizDto"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - quiz
+      summary: Xoá quiz
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /quiz:
+    get:
+      tags:
+        - quiz
+      summary: Get toàn bộ quiz của 1 lesson
+      description: ""
+      parameters:
+        - name: lesson
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+                schema:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Quiz"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    delete:
+      tags:
+        - quiz
+      summary: Xoá nhiều quiz của 1 lesson
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+                schema:
+                  type: object
+                  properties:
+                    data:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/Quiz"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  
+  /exam:
+    get:
+      tags:
+        - exam
+      summary: review bài thi đã làm
+      description: ""
+      parameters:
+        - name: lesson
+          in: query
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+    post:
+      tags:
+        - exam
+      summary: Nộp bài thi
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lesson:
+                  type: string
+                exams:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      quizId:
+                        type: string
+                      answeredIds:
+                        type: array
+                        items:
+                          type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+   
+  /comment:
+    post:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lessonId:
+                  type: string
+                content:
+                  type: string
+                commentId:
+                  type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+  /comment/{id}:  
+    delete:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+    put:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentCommentId:
+                  type: string
+                content:
+                  type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+     

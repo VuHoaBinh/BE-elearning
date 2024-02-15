@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hoá đơn #<%= invoice._id%>
+    </title>
+</head>
+
+<style>
+    .container {
+        width: 700px;
+        border: 1px solid black;
+        padding: 20px;
+        margin: auto;
+        height: auto;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        border-bottom: 1px solid rgb(194, 193, 193);
+    }
+
+    .info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgb(194, 193, 193);
+    }
+
+    .info .content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info .content h3 {
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 24px;
+    }
+
+    .info .qr_code img {
+        height: 150px;
+        width: 150px;
+    }
+
+    .cart-detail {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .cart-detail table {
+        width: 100%;
+    }
+
+    th {
+        background-color: #969696;
+    }
+
+    th,
+    td {
+        border: 1px solid rgb(214, 212, 212);
+        padding: 10px;
+    }
+</style>
+
+<body>
+    <div id="container" class="container">
+        <% if(invoice){ %>
+            <div class="header">
+                <h3>GENY COURSE ECOMMERCE</h3>
+                <span>
+                    <%= invoice.createdAt %>
+                </span>
+            </div>
+            <div class="info">
+                <div class="content">
+                    <h3>Hoá đơn #<%= invoice._id %>
+                    </h3>
+                    <span><b>Kính gửi:</b>
+                        <%= invoice.user.fullName %>
+                    </span>
+                    <span><b>Phương thức thanh toán:</b>
+                        <%= invoice.paymentMethod %>
+                    </span>
+                    <span><b>Tổng số tiền ước tính:</b>
+                        <%= invoice.totalPrice %> vnđ
+                    </span>
+                    <span><b>Giảm giá:</b>
+                        <%= invoice.totalDiscount %> vnđ
+                    </span>
+                    <span><b>Thanh toán:</b>
+                        <%= invoice.paymentPrice%> vnđ
+                    </span>
+                    <span><b>Trạng thái:</b>
+                        <% if(invoice.status=='Paid' ){%>
+                            Đã thanh toán
+                            <%}else{%>
+                                Đã huỷ
+                                <% }%>
+
+                    </span>
+                </div>
+                <div id="qrcode">
+                </div>
+            </div>
+            <div class="cart-detail">
+                <table>
+                    <tr>
+                        <th colspan="4">Thông tin chi tiết hoá đơn</th>
+                    </tr>
+                    <tr>
+                        <th>Tên khoá học</th>
+                        <th>Giá</th>
+                        <th>Giảm giá</th>
+                        <th>Tạm tính</th>
+                    </tr>
+                    <% invoice.detailInvoices.forEach(item=>{ %>
+                        <tr>
+                            <td>
+                                <a href="<%=url %>/course/<%=item.courseSlug %>">
+                                    <%= item.courseName %>
+                                </a>
+                            </td>
+                            <td>
+                                <%= item.courseCurrentPrice%> vnđ
+                            </td>
+                            <td>
+                                <%= item.discount%> vnđ
+                            </td>
+                            <td>
+                                <%= item.amount %> vnđ
+                            </td>
+                        </tr>
+                        <%}) %>
+                </table>
+            </div>
+
+            <% } %>
+
+    </div>
+    <div style="margin: auto;height: auto; width: 200px; padding: 10px;">
+        <button onclick="PrintElem()">In hoá đơn</button>
+        <button><a href="<%=url %>">Trang chủ</a></button>
+    </div>
+
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/qrcode.min.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script type="text/javascript">
+        new QRCode(document.getElementById("qrcode"), {
+            text: "<%=url %>/invoice/<%=invoice._id %>", width: 150,
+            height: 150,
+        });
+        function PrintElem() {
+            var mywindow = window.open('', 'PRINT', 'height=800,width=1100');
+            mywindow.document.write('<html><head><title>' + document.title + '</title>');
+            mywindow.document.write('</head>');
+            mywindow.document.write(`<style>
+    .container {
+        width: 700px;
+        border: 1px solid black;
+        padding: 20px;
+        justify-content: center;
+        margin: auto;
+    }
+
+    .header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+
+        border-bottom: 1px solid rgb(194, 193, 193);
+    }
+
+    .info {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgb(194, 193, 193);
+    }
+
+    .info .content {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .info .content h3 {
+        text-align: center;
+        text-transform: uppercase;
+        font-size: 24px;
+    }
+
+    .info .qr_code img {
+        height: 150px;
+        width: 150px;
+    }
+
+    .cart-detail {
+        margin-top: 20px;
+        width: 100%;
+    }
+
+    .cart-detail table {
+        width: 100%;
+    }
+
+    th {
+        background-color: #969696;
+    }
+
+    th,
+    td {
+        border: 1px solid rgb(214, 212, 212);
+        padding: 10px;
+    }
+</style>`);
+            mywindow.document.write('</body>');
+
+            mywindow.document.write(document.getElementById('container').innerHTML);
+
+            mywindow.document.write(`<scr` + `ipt type="text/javascript"> window.print(); </sc` + `ript>`)
+            mywindow.document.write(`</body></html>`);
+
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            return true;
+        }
+    </script>
+</body>
+
+</html>

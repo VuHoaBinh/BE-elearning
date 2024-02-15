@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APIs Luận Văn</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.6.1/socket.io.js"
+        integrity="sha512-xbQU0+iHqhVt7VIXi6vBJKPh3IQBF5B84sSHdjKiSccyX/1ZI7Vnkt2/8y8uruj63/DVmCxfUNohPNruthTEQA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+
+<body>
+    <h2>Server is running ...</h2>
+    <a href="/api-docs">APIS Documentation</a>
+    <br> <br>
+    <a href="https://www.course-ecommerce.tk/">Demo Client</a>
+    
+    <script>
+        let accessToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJHTVMiLCJzdWIiOnsiYWNjb3VudCI6IjYyYWM3NTMwNmNiNWZkOGZiNjI3YTk4OCJ9LCJpYXQiOjE2ODE2Mzk4NTgsImV4cCI6MTY4MTg5OTA1OH0.k-WKN0Wbiql1gCGLmwSrEkueM9a2wjCzHLfo5E8NkQM"
+        function connectSocket(token = `Beaer ${accessToken}`) {
+            const socket = io('/', {
+                extraHeaders: {
+                    token
+                }
+            });
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+            });
+            socket.on('send-message', (message) => {
+                console.log('new message:', message);
+            });
+        }
+        console.log('You can use `accessToken` to assign token to `connectSocket()`');
+        console.log('You can use `connectSocket()` to connect to socket server');
+    </script>
+</body>
+
+</html>
