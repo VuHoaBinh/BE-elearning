@@ -1,0 +1,52 @@
+version: "3.3"
+
+services:
+  app:
+    image: gadola/courses-ecommerce:production
+    volumes:
+      - ./:/app # mount từ môi trường gốc vào trong để nếu các bạn thay đổi code thì bên trong sẽ tự động cập nhật
+    environment:
+      # phần này ta định nghĩa ở file .env nhé
+      - MONGO_URI=${MONGO_URI}
+      - NODE_ENV=${NODE_ENV}
+      - PORT_REDIS=${PORT_REDIS}
+      - PORT=${PORT}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_SERVICE_ACCOUNT_EMAIL=${GOOGLE_SERVICE_ACCOUNT_EMAIL}
+      - GOOGLE_PRIVATE_KEY=${GOOGLE_PRIVATE_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - CORS_ORIGIN=${CORS_ORIGIN}
+      - SALT_ROUND=${SALT_ROUND}
+      - MONGO_URI_LOCAL=${MONGO_URI_LOCAL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - JWT_SECRET_REFRESH_KEY=${JWT_SECRET_REFRESH_KEY}
+      - JWT_ISS=${JWT_ISS}
+      - CLOUD_NAME=${CLOUD_NAME}
+      - CLOUD_API_KEY=${CLOUD_API_KEY}
+      - CLOUD_API_SECRET=${CLOUD_API_SECRET}
+      - NODE_MAIL_USER=${NODE_MAIL_USER}
+      - NODE_MAIL_PASSWORD=${NODE_MAIL_PASSWORD}
+      - PAYMENT_GATEWAY=${PAYMENT_GATEWAY}
+      - MERCHANT_CODE=${MERCHANT_CODE}
+      - SECURE_SECRET=${SECURE_SECRET}
+      - TZ=${TZ}
+      - FFPROBE_PATH=${FFPROBE_PATH}
+    ports:
+      - "${PORT}:${PORT}" # phần này ta định nghĩa ở file .env nhé
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - db
+
+  db:
+    image: mongo
+    volumes:
+      - .docker/data/db:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:5-alpine
+    volumes:
+      - .docker/data/redis:/data
+    restart: unless-stopped

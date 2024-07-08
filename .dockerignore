@@ -1,0 +1,17 @@
+# Bỏ qua node_modules vì lát nữa ở Dockerfile sẽ chạy npm install
+node_modules
+
+# Bỏ qua folder .docker vì folder này chỉ có service db và redis mới cần (ta đang build image cho service app)
+.docker
+
+# Bỏ qua ảnh mà chúng ta đã upload lên trong quá trình test
+public/logs/*
+
+# Bỏ qua file .env, file này dùng cho docker-compose khi chạy nên không cần đưa vào image
+.env
+
+# Bỏ qua Dockerfile không đưa vào image vì file này chỉ dùng tại thời điểm build image
+Dockerfile
+
+# Bỏ qua file docker-compose vì file này chỉ dùng tại thời điểm khởi chạy project
+docker-compose.yml
