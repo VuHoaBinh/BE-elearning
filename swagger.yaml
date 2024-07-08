@@ -37,6 +37,11 @@ tags:
     description: apis liên quan đến mã giảm giá
   - name: payment
     description: apis liên quan đến thanh toán
+<<<<<<< HEAD
+=======
+  - name: chat
+    description: apis liên quan nhắn tin
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
   - name: teacher
     description: apis liên quan teacher
   - name: invoice
@@ -446,6 +451,33 @@ components:
         content:
           type: string
 
+<<<<<<< HEAD
+=======
+    Comment:
+      type: object
+      properties:
+        lesson:
+          $ref: "#/components/schemas/Lesson"
+        author:
+          $ref: "#/components/schemas/User"
+        content:
+          type: string
+        replies:
+          type: array
+          items:
+            type: object
+            properties:
+              lesson:
+                $ref: "#/components/schemas/Lesson"
+              author:
+                $ref: "#/components/schemas/User"
+              content:
+                type: string
+              createdAt:
+                type: string
+ 
+
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     Chapter:
       type: object
       properties:
@@ -2914,6 +2946,186 @@ paths:
           description: "Unauthorize"
         500:
           description: "SERVER ERROR"
+<<<<<<< HEAD
+=======
+
+  /chat/conversation:
+    post:
+      tags:
+        - chat
+      summary: Gửi yêu cầu/chấp nhận kết nối hội thoại bằng userId
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateConversationDot"
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    get:
+      tags:
+        - chat
+      summary: Lấy danh sách hội thoại
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: pending
+          schema:
+            type: boolean
+            default: false
+          in: query
+          description: lấy hội thoại đang chờ kết nối
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  members:
+                    type: array
+                    items:
+                      type: string
+                  pending:
+                    type: string
+                  messages:
+                    $ref: "#/components/schemas/Message"
+
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/accept-conversation:
+    post:
+      tags:
+        - chat
+      summary: Chấp nhận kết nối hội thoại bằng conversation id
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                conversation:
+                  type: string
+                text:
+                  type: string
+              required:
+                - conversation
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/message:
+    post:
+      tags:
+        - chat
+      summary: Gửi tin nhắn bằng conversation id
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                conversation:
+                  type: string
+                text:
+                  type: string
+              required:
+                - conversation
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/conversation/{conversation}:
+    get:
+      tags:
+        - chat
+      summary: Lấy tin nhắn gần nhất của hội thoại
+      description: ""
+      parameters:
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/limit"
+        - name: conversation
+          schema:
+            type: string
+          in: path
+          description: mã hội thoại
+          required: true
+      responses:
+        200:
+          description: "ok"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  messages:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Message"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+    put:
+      tags:
+        - chat
+      summary: Đánh dấu đã xem tin nhắn của hội thoại
+      description: ""
+      parameters:
+        - name: conversation
+          schema:
+            type: string
+          in: path
+          description: mã hội thoại
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  /chat/chatbot:
+    post:
+      tags:
+        - chat
+      summary: Chat with Chat GPT OpenAI
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                text:
+                  type: string
+              required:
+                - text
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"
+  
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
   # admin region
   /admin/users/teachers:
     get:
@@ -4069,4 +4281,82 @@ paths:
         401:
           description: "Unauthorize"
         500:
+<<<<<<< HEAD
           description: "SERVER ERROR"
+=======
+          description: "SERVER ERROR"   
+   
+  /comment:
+    post:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lessonId:
+                  type: string
+                content:
+                  type: string
+                commentId:
+                  type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+  /comment/{id}:  
+    delete:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+    put:
+      tags:
+        - comment
+      summary: tạo comment trong lesson
+      description: ""
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                parentCommentId:
+                  type: string
+                content:
+                  type: string
+      responses:
+        200:
+          description: "ok"
+        401:
+          description: "Unauthorize"
+        500:
+          description: "SERVER ERROR"   
+     
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda

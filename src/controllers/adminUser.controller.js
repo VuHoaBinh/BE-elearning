@@ -7,7 +7,10 @@ var fs = require('fs')
 const MyCourseModel = require('../models/users/myCourse.model')
 const mongoose = require('mongoose')
 const TeacherModel = require('../models/users/teacher.model')
+<<<<<<< HEAD
 const CourseModel = require('../models/courses/course.model')
+=======
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
 const ObjectId = mongoose.Types.ObjectId
 
 function ValidateEmail(mail) {
@@ -154,7 +157,10 @@ const getStudents = async (req, res, next) => {
       {
         $match: {
           $or: [{ 'account.role': 'student' }, { 'account.role': 'customer' }],
+<<<<<<< HEAD
           'account.isActive': true,
+=======
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
         },
       },
       {
@@ -214,7 +220,10 @@ const getStudents = async (req, res, next) => {
       {
         $match: {
           $or: [{ 'account.role': 'student' }, { 'account.role': 'customer' }],
+<<<<<<< HEAD
           'account.isActive': true,
+=======
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
         },
       },
       {
@@ -488,6 +497,7 @@ const getDetailTeacher = async (req, res, next) => {
 const getDetailAccountAndUser = async (req, res, next) => {
   try {
     const { id } = req.params
+<<<<<<< HEAD
     let aQuery = [
       { $match: { _id: ObjectId(id) } },
       {
@@ -541,6 +551,15 @@ const getDetailAccountAndUser = async (req, res, next) => {
   } catch (error) {
     console.log('> Get detail user fail :: ', error)
     return res.status(500).json({ message: error.message })
+=======
+    const user = await UserModel.findById(id)
+      .populate('account', '-__v -password -refreshToken -accessToken')
+      .lean()
+    return res.status(200).json({ message: 'ok', user })
+  } catch (error) {
+    console.error('> Get detail account user :: ', error)
+    return res.status(500).json({ message: 'error' })
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
   }
 }
 
@@ -548,6 +567,7 @@ const getDetailAccountAndUser = async (req, res, next) => {
 // POST /api/admin/users
 const postAccountAndUser = async (req, res, next) => {
   try {
+<<<<<<< HEAD
     const {
       email,
       password,
@@ -569,12 +589,20 @@ const postAccountAndUser = async (req, res, next) => {
         }
       }
 
+=======
+    const { email, password, role = 'student', fullName, birthday, gender, phone } = req.body
+
+    if (ValidateEmail(email)) {
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
       const newAcc = await AccountModel.create({
         email: email.toLowerCase().trim(),
         password: password.trim(),
         role,
       })
+<<<<<<< HEAD
 
+=======
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
       if (newAcc) {
         const newUser = await UserModel.create({
           fullName,
@@ -583,11 +611,21 @@ const postAccountAndUser = async (req, res, next) => {
           gender,
           phone,
         })
+<<<<<<< HEAD
         if (newUser) await HistorySearchModel.create({ user: newUser._id })
         if (newUser && role == 'teacher')  await TeacherModel.create({ user: newUser._id, isVerified: true })
         else if (newUser && role === 'student')  await MyCourseModel.create({ user: newUser, course, progressPaid })
       }
     
+=======
+        if (newUser) {
+          await HistorySearchModel.create({ user: newUser._id })
+        }
+        if (newUser && role == 'teacher') {
+          await TeacherModel.create({ user: newUser._id, isVerified: true })
+        }
+      }
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
       return res.status(201).json({ message: 'ok' })
     }
     return res.status(400).json({ message: 'email không hợp lệ' })
@@ -682,7 +720,11 @@ const postMultiAccountAndUser = async (req, res, next) => {
 const putAccountAndUser = async (req, res, next) => {
   try {
     const { id } = req.params
+<<<<<<< HEAD
     var { user, account, courseId, progressPaid } = req.body
+=======
+    var { user, account } = req.body
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     // check input tránh hacker
     if (user && user.account) {
       delete user.account
@@ -711,10 +753,13 @@ const putAccountAndUser = async (req, res, next) => {
     if (user !== null && typeof user === 'object') {
       await UserModel.updateOne({ _id: id }, user)
     }
+<<<<<<< HEAD
     if (courseId) {
       let course = await CourseModel.findById(courseId)
       await MyCourseModel.updateOne({ user: id }, { course, progressPaid })
     }
+=======
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     return res.status(200).json({ message: 'update ok' })
   } catch (error) {
     console.log('> Update account user fail', error)
@@ -729,9 +774,16 @@ const deleteAccountAndUser = async (req, res, next) => {
     const { id } = req.params
 
     let user = await UserModel.findById(id).lean()
+<<<<<<< HEAD
     await UserModel.deleteOne({ _id: id })
     await AccountModel.deleteOne({ _id: user.account })
     return res.status(200).json({ message: 'ok!' })
+=======
+    // await UserModel.deleteOne({ _id: id })
+    // await AccountModel.deleteOne({ _id: user.account })
+    await AccountModel.updateOne({ _id: user.account }, { isActive: false })
+    return res.status(200).json({ message: 'ok! isActive : false' })
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
   } catch (error) {
     console.log('> Delete account user fail', error)
     return res.status(500).json({ message: 'error' })
@@ -743,7 +795,11 @@ const deleteMultiAccountAndUser = async (req, res, next) => {
   try {
     const { ids } = req.body
     let logs = ''
+<<<<<<< HEAD
     let success = 0
+=======
+    let sucess = 0
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     for (let i = 0; i < ids.length; i++) {
       let id = ids[i]
       let user = {}
@@ -756,18 +812,34 @@ const deleteMultiAccountAndUser = async (req, res, next) => {
         logs += `Lỗi: index:${i}. id '${id}' không tồn tại \n`
         continue
       }
+<<<<<<< HEAD
       await UserModel.deleteOne({ _id: id })
       await AccountModel.deleteOne({ _id: user.account })
+=======
+      const { modifiedCount } = await AccountModel.updateOne(
+        { _id: user.account },
+        { isActive: false }
+      )
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
       if (modifiedCount != 1) {
         logs += `Lỗi: index:${i}. id '${id}' giá trị cập nhật không khác giá trị ban đầu`
         continue
       }
+<<<<<<< HEAD
       success++
     }
     if (logs == '') {
       return res.status(200).json({ message: `update ${success}/${ids.length} oke` })
     }
     return res.status(200).json({ message: `update ${success}/${ids.length} oke`, error: logs })
+=======
+      sucess++
+    }
+    if (logs == '') {
+      return res.status(200).json({ message: `update ${sucess}/${ids.length} oke` })
+    }
+    return res.status(200).json({ message: `update ${sucess}/${ids.length} oke`, error: logs })
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
   } catch (error) {
     console.log('> Delete many account fail:', error)
     return res.status(500).json({ message: error })

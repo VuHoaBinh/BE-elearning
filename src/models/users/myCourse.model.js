@@ -30,6 +30,7 @@ const myCourseSchema = new Schema(
       type: String,
       default: null,
     },
+<<<<<<< HEAD
     progressPaid: {
       type: [Object],
       datePaid: {
@@ -40,6 +41,11 @@ const myCourseSchema = new Schema(
         type: Number,
         default: 0,
       },
+=======
+    isPaid: {
+      type: Boolean,
+      default: false,
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     },
   },
   { timestamps: true }

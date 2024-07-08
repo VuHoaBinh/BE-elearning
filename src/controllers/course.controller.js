@@ -1,6 +1,10 @@
 const CourseModel = require('../models/courses/course.model');
 const ChapterModel = require('../models/courses/chapter.model');
 const LessonModel = require('../models/courses/lesson.model');
+<<<<<<< HEAD
+=======
+const RateModel = require('../models/courses/rate.model');
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
 const CommentModel = require('../models/courses/comment.model');
 const HistorySearchModel = require('../models/users/historySearch.model');
 const HistoryViewModel = require('../models/users/historyView.model');
@@ -193,7 +197,11 @@ const putCourse = async (req, res, next) => {
 const getCourses = async (req, res, next) => {
     try {
         const { user } = req
+<<<<<<< HEAD
         let { page = 1, limit = 100, sort, name, category, min, max, hashtags, rating, level, publish, status, author } = req.query
+=======
+        let { page = 1, limit = 10, sort, name, category, min, max, hashtags, rating, level, publish, status, author } = req.query
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
         const nSkip = (parseInt(page) - 1) * parseInt(limit)
         let searchKey = await didYouMean(name) || null
         let aCountQuery = [
@@ -1117,6 +1125,37 @@ const getHotCourses = async (req, res, next) => {
     }
 }
 
+<<<<<<< HEAD
+=======
+
+// fn: lấy thông tin đánh giá khoá học và đánh giá của user nếu có
+const getRates = async (req, res, next) => {
+    try {
+        const { page = 1, limit = 10 } = req.query
+        const { slug } = req.params
+        const { user } = req
+        // lấy id khoá học
+        const course = await CourseModel.findOne({ slug }).lean()
+        if (!course) return res.status(404).json({ message: 'Course not found' })
+        // lấy thông tin đánh giá khoá học
+        const rates = await RateModel.find({ course: course._id })
+            .select('-__v -course')
+            .populate('author', '_id fullName')
+            .skip((parseInt(page) - 1) * parseInt(limit))
+            .limit(parseInt(limit))
+        let userRating = null
+        if (user) {
+            userRating = await RateModel.findOne({ user, course }).lean()
+        }
+        return res.status(200).json({ message: 'ok', userRating, rates })
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: error.message })
+    }
+}
+
+
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
 //fn: xoá khoá học
 const deleteCourse = async (req, res, next) => {
     try {
@@ -1317,6 +1356,10 @@ module.exports = {
     getCourse,
     getRelatedCourses,
     getHotCourses,
+<<<<<<< HEAD
+=======
+    getRates,
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     getSuggestCourses,
     deleteCourse,
     getDetailPendingCourse,

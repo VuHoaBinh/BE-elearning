@@ -40,6 +40,11 @@
     "node-xlsx": "^0.21.0",
     "nodemailer": "^6.7.3",
     "openai": "^3.1.0",
+<<<<<<< HEAD
+=======
+    "passport": "^0.6.0",
+    "passport-google-token": "^0.1.2",
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
     "qrcode": "^1.5.0",
     "redis": "^4.0.6",
     "socket.io": "^4.4.1",

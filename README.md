@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Course Ecommerce - Thesis
 
 [![by hoang nam](https://img.shields.io/badge/By-Hoang%20Nam-green)](https://github.com/pmhnam)
@@ -118,3 +119,6 @@ Bước 5: Truy cập `http://localhost:3000/api-docs` để xem APIs
 ## License
 
 [MIT](https://choosealicense.com/licenses/mit/)
+=======
+\
+>>>>>>> 1fd8259f43ec7cf4f04b0dbe5db9559277f79dda
